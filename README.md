@@ -1,2 +1,2 @@
-# Midterm-2-Group-Project
-<small>"Rock, Paper, Scissors"</small>
+# "Rock, Paper, Scissors"
+<small>Midterm 2 Group Project"</small>
