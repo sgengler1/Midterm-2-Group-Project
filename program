@@ -1,0 +1,103 @@
+import random
+from enum import IntEnum
+
+class Action(IntEnum):
+    Rock = 0
+    Paper = 1
+    Scissors = 2
+    Lizard = 3
+    Spock = 4
+
+VICTORIES = {
+    Action.Rock:       [Action.Scissors, Action.Lizard],
+    Action.Paper:      [Action.Rock, Action.Spock],
+    Action.Scissors:   [Action.Paper, Action.Lizard],
+    Action.Lizard:     [Action.Spock, Action.Paper],
+    Action.Spock:      [Action.Rock, Action.Scissors],
+
+VERBS = {
+    (Action.Rock, Action.Scissors):   "crushes",
+    (Action.Rock, Action.Lizard):     "crushes",
+    (Action.Paper, Action.Rock):      "covers",
+    (Action.Paper, Action.Spock):     "disproves",
+    (Action.Scissors, Action.Paper):  "cuts",
+    (Action.Scissors, Action.Lizard): "decapitates",
+    (Action.Lizard, Action.Spock):    "poisons",
+    (Action.Lizard, Action.Paper):    "eats",
+    (Action.Spock, Action.Rock):      "vaporizes",
+    (Action.Spock, Action.Scissors):  "smashes",
+}
+
+def get_player_move() -> Action:
+    """Get a valid move from the player."""
+    while True:
+        raw = input("Rock, Paper, Scissors, Lizard, or Spock? (or 'quit'): ").strip().lower()
+        if raw == "quit":
+            raise SystemExit("Thanks for playing!")
+        try:
+            return Action[raw.capitalize()]
+        except KeyError:
+            print("  Invalid choice. Try again.")
+
+def get_cpu_move() -> Action:
+    """Pick a random move for the CPU."""
+    return random.choice(list(Action))
+
+def resolve(player: Action, cpu: Action) -> str:
+    """Return 'win', 'lose', or 'tie'."""
+    if player == cpu:
+        return "tie"
+    if cpu in VICTORIES[player]:
+        return "win"
+    return "lose"
+
+def print_round(player: Action, cpu: Action, result: str, round_num: int):
+    """Display the round result with flavor text."""
+    print(f"\n  Round {round_num}: You → {player.name}  |  CPU → {cpu.name}")
+    if result == "tie":
+        print("  It's a tie!")
+    else:
+        winner = player if result == "win" else cpu
+        loser  = cpu if result == "win" else player
+        verb = VERBS.get((winner, loser), "beats")
+        who  = "You win" if result == "win" else "CPU wins"
+        print(f"  {who}! {winner.name} {verb} {loser.name}.")
+
+def play_match(target_wins: int = 3):
+    """Play a best-of-N match (first to `target_wins`)."""
+    print(f"\n{'='*40}")
+    print(f"  BEST OF {target_wins * 2 - 1}  (first to {target_wins})")
+    print(f"{'='*40}")
+
+    player_wins = cpu_wins = round_num = 0
+
+    while player_wins < target_wins and cpu_wins < target_wins:
+        round_num += 1
+        player = get_player_move()
+        cpu    = get_cpu_move()
+        result = resolve(player, cpu)
+
+        if result == "win":
+            player_wins += 1
+        elif result == "lose":
+            cpu_wins += 1
+
+        print_round(player, cpu, result, round_num)
+        print(f"  Score → You: {player_wins}  |  CPU: {cpu_wins}")
+
+    # Final result
+    print(f"\n{'='*40}")
+    if player_wins > cpu_wins:
+        print("  𓆈 YOU WIN!")
+    else:
+        print(" ¥[*.*]¥ YOU LOST..")
+    print(f"{'='*40}\n")
+
+
+if __name__ == "__main__":
+    while True:
+        play_match(target_wins=3)
+        again = input("Play another match? (y/n): ").strip().lower()
+        if again != "y":
+            print("Goodbye!")
+            break
